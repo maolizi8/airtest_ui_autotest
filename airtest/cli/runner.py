@@ -59,6 +59,31 @@ class AirtestCase(unittest.TestCase):
         with open(pyfilepath, 'r', encoding="utf8") as f:
             code = f.read()
         pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
+        
+        print('<gql> runner>runTest>pyfilepath: ',pyfilepath)
+        print('<gql> runner>runTest>code: ',code)
+        print('<gql> runner>runTest>self.scope: ',self.scope)
+#         log('<gql> runner>runTest>pyfilepath: ',pyfilepath)
+#         log('<gql> runner>runTest>code: ',code)
+#         log('<gql> runner>runTest>self.scope: ',self.scope)
+        
+        try:
+            exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
+        except Exception as err:
+            tb = traceback.format_exc()
+            log("Final Error", tb)
+            six.reraise(*sys.exc_info())
+    
+    def runTestPy(self):
+        '''运行Py文件用例'''
+        #scriptpath, pyfilename = script_dir_name(self.args.script)
+        #pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(self.args.script)
+        
+        self.scope["__file__"] = pyfilepath
+        with open(pyfilepath, 'r', encoding="utf8") as f:
+            code = f.read()
+        pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
 
         try:
             exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
@@ -66,7 +91,25 @@ class AirtestCase(unittest.TestCase):
             tb = traceback.format_exc()
             log("Final Error", tb)
             six.reraise(*sys.exc_info())
+    
+    def runTestPyTest(self):
+        '''运行Py文件用例'''
+        #scriptpath, pyfilename = script_dir_name(self.args.script)
+        #pyfilepath = os.path.join(scriptpath, pyfilename)
+        pyfilepath = os.path.abspath(self.args.script)
+        
+        self.scope["__file__"] = pyfilepath
+        with open(pyfilepath, 'r', encoding="utf8") as f:
+            code = f.read()
+        pyfilepath = pyfilepath.encode(sys.getfilesystemencoding())
 
+        try:
+            exec(compile(code.encode("utf-8"), pyfilepath, 'exec'), self.scope)
+        except Exception as err:
+            tb = traceback.format_exc()
+            log("Final Error", tb)
+            six.reraise(*sys.exc_info())
+                    
     @classmethod
     def exec_other_script(cls, scriptpath):
         """run other script in test script"""
@@ -145,7 +188,7 @@ def run_script(parsed_args, testcase_cls=AirtestCase):
         raise Exception('测试用例失败')
 
 
-def run_air_batch_mode(device, proj_root, tc_folder='', tc_name=''):
+def run_air_batch_mode(device, proj_root, tc_folder='', tc_name='',f_type='.air'):
     # 聚合结果
     report_dir = os.sep.join([proj_root, 'reports'])
     case_dir = os.sep.join([proj_root, tc_folder])
@@ -181,7 +224,8 @@ def run_air_batch_mode(device, proj_root, tc_folder='', tc_name=''):
     
     for f in os.listdir(case_dir):
         print('case_dir > f:',f)
-        if f.endswith(".air"):
+        #if f.endswith(".air"):
+        if f.endswith(f_type):    
             # f为.air案例名称
             print('   (.air)test file:',f)
             airName = f

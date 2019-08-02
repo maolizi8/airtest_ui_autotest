@@ -122,13 +122,25 @@ class Template(object):
 
     @property
     def filepath(self):
+        print('airtest>core>cv>filepath> ST: ',ST)
         if self._filepath:
+            print('   if> self._filepath: ',self._filepath)
             return self._filepath
+        
+        print('    self.filename: ',self.filename)
+        print('    G.BASEDIR: ',G.BASEDIR)
+        # <GQL add>
+        print('<gql> filepath TEMPLATE')
+        
+        #for dirname in G.TEMPLATE:
         for dirname in G.BASEDIR:
             filepath = os.path.join(dirname, self.filename)
+            print('    filepath: ',filepath)
             if os.path.isfile(filepath):
                 self._filepath = filepath
                 return self._filepath
+        
+        print('      return>self.filename: ',self.filename)
         return self.filename
 
     def __repr__(self):

@@ -9,13 +9,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 print('BASE_DIR :',BASE_DIR)
 
 
-def init_cmdrun_adb(device, port='5555'):
+def init_cmdrun_adb(device, port='5055'):
     adb_path=os.path.join(BASE_DIR,'airtest','core','android','static','adb','windows','adb.exe')
     print('adb_path :',adb_path)
     cmd_str=adb_path +' -P ' + port +' -s '+device
     print('command: ',cmd_str)
     subprocess.run(cmd_str)
 
+def kill_cmdrun_adb(port='5055'):
+    '''关闭adb'''
+    adb_path=os.path.join(BASE_DIR,'airtest','core','android','static','adb','windows','adb.exe')
+    print('adb_path :',adb_path)
+    cmd_str=adb_path +' -P ' + port + ' kill-server'
+    print('command: ',cmd_str)
+    subprocess.run(cmd_str)
+    #subprocess.run(cmd_str, shell=True, check=True)   
+    
 def init_AirtestIDE_adb(device, ide_dir, port='5037'):
     '''
     @param ide_dir: AirtestIDE的目录，
@@ -32,6 +41,7 @@ def init_AirtestIDE_adb(device, ide_dir, port='5037'):
     #subprocess.run(cmd_str, shell=True, check=True)
      
 if __name__ == '__main__':
+    kill_cmdrun_adb()
     #init_cmdrun_adb('46709b100104')
     #init_AirtestIDE_adb('02157df271610a1b', 'E:\\AirtestIDE')
-    init_AirtestIDE_adb('46709b100104', 'E:\\AirtestIDE')
+    #init_AirtestIDE_adb('46709b100104', 'E:\\AirtestIDE')

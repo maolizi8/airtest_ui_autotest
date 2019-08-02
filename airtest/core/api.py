@@ -61,6 +61,7 @@ def connect_device(uri):
     if host:
         params["host"] = host.split(":")
     dev = init_device(platform, uuid, **params)
+    print('    dev:',dev)
     return dev
 
 
@@ -104,10 +105,20 @@ def auto_setup(basedir=None, devices=None, logdir=None, project_root=None):
     :param project_root: project root dir for `using` api.
     """
     if basedir:
+        
         if os.path.isfile(basedir):
+            # <GQL add>
+            #filename,ext = os.path.splitext(basedir)
+            #print('<gql> G.TEMPLATE')
+            #temp_dir=os.path.join(basedir,filename)
+            #if temp_dir not in G.TEMPLATE:
+            #    G.TEMPLATE.append(temp_dir)
+            
             basedir = os.path.dirname(basedir)
         if basedir not in G.BASEDIR:
             G.BASEDIR.append(basedir)
+        
+        
     if devices:
         for dev in devices:
             connect_device(dev)
@@ -213,8 +224,12 @@ def snapshot(filename=None, msg=""):
     """
     if filename:
         if not os.path.isabs(filename):
-            logdir = ST.LOG_DIR or "."
+            
+            #logdir = ST.LOG_DIR or "."
+            #filename = os.path.join(logdir, filename)
+            logdir = G.TEMPLATE
             filename = os.path.join(logdir, filename)
+            print('  save snapshot:',filename)
         screen = G.DEVICE.snapshot(filename)
         return try_log_screen(screen)
     else:
