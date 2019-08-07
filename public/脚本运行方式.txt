@@ -1,0 +1,14 @@
+【启动多个ADB】
+AirtestIDE：
+	E:\AirtestIDE\airtest\core\android\static\adb\windows\adb.exe -P 5037 -s XXXX1
+	
+python命令行运行脚本时： 
+	D:\Python36\Lib\site-packages\airtest\core\android\static\adb\windowsadb.exe -P 5555 -s XXXX2
+
+
+
+python -m airtest run untitled.air --device Android://127.0.0.1:5037/46709b100104
+
+
+python -m airtest run test_usercenter.air --device Android://127.0.0.1:5037/46709b100104
+python -m airtest run test_usercenter.air --device Android:///
