@@ -53,7 +53,7 @@ def store_run_collections(session):
             from localplugins.mysql_opr import query_pymysql
             #print('[session.fspath: {}]'.format(session.fspath))
             fspath=str(session.fspath).replace('\\','\\\\')
-            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-qa-0.json')
+            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'mysql_qa.json')
             f=open(fpath, 'r', encoding='utf-8')
             dbinfo = json.loads(f.read())
             sql='''
@@ -75,7 +75,7 @@ def update_run_collections(item, call, report):
             from html import escape
             from localplugins.mysql_opr import query_many_pymysql
             
-            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-qa-0.json')
+            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'mysql_qa.json')
             f=open(fpath, 'r', encoding='utf-8')
             dbinfo = json.loads(f.read())
             
@@ -453,7 +453,7 @@ class HTMLReport(object):
             try:
                 from localplugins.mysql_opr import query_pymysql
                 
-                fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-qa-0.json')
+                fpath=os.path.join(BASE_DIR,'localplugins','resources', 'mysql_qa.json')
                 
                 #print('fpath :',fpath)
                 f=open(fpath, 'r', encoding='utf-8')

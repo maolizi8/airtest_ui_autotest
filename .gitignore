@@ -22,4 +22,6 @@ __pycache__/
 # log/reports
 log
 reports
+#account_list.json
+mysql_qa.json
 
