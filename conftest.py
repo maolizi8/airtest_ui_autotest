@@ -58,15 +58,6 @@ def pytest_addoption(parser):
     group.addoption('--jkjobname', action='store',
                     help='jenkins jobname, to make online html report.')
 
-def read_json(file_name, subdir=""):
-    if subdir:
-        fpath=os.sep.join([PROJ_ROOT, "files", subdir, file_name]) + ".json"
-    else:
-        fpath=os.sep.join([PROJ_ROOT, "files", file_name]) + ".json"
-    json_content={}    
-    with open(fpath, "r", encoding="utf-8") as f:
-        json_content = json.loads(f.read())
-    return json_content
 
 @pytest.fixture(scope="session")
 def driver_class(request):
@@ -125,9 +116,13 @@ def account(request):
         print('use stored password from file')
         exc_env=request.config.getoption("exc_env")
         if exc_env in ['prd','PRD','prOd','PROD','product','PRODUCT']:
-            user_account=read_json('account_list','prod_env')
+            fpath=os.path.join(PROJ_ROOT,'files','prod_env', 'account_list.json')
+            f=open(fpath, 'r', encoding='utf-8')
+            user_account = json.loads(f.read())
         else:
-            user_account=read_json('account_list','test_env')
+            fpath=os.path.join(PROJ_ROOT,'files','test_env', 'account_list.json')
+            f=open(fpath, 'r', encoding='utf-8')
+            user_account = json.loads(f.read())
         return {"uname": username,"upwd": user_account[username]}
 
 @pytest.fixture
