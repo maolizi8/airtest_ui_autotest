@@ -67,7 +67,7 @@ def store_run_collections(session):
             print('Exception when inserting test collection to mysql: ',e)
             #print('[Exception<inserting to uitest_collect>: {}]'.format(e),end='')
 
-def update_run_collections(item, call):
+def update_run_collections(item, call, report):
     jkbuildid=item.config.getoption("--jkbuildid")
     jkjobname=item.config.getoption("--jkjobname")
     if jkbuildid!=-1 and jkjobname:
@@ -75,7 +75,7 @@ def update_run_collections(item, call):
             from html import escape
             from localplugins.mysql_opr import query_many_pymysql
             
-            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-0345.json')
+            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-qa.json')
             f=open(fpath, 'r', encoding='utf-8')
             dbinfo = json.loads(f.read())
             
@@ -453,7 +453,7 @@ class HTMLReport(object):
             try:
                 from localplugins.mysql_opr import query_pymysql
                 
-                fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-0345.json')
+                fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-qa.json')
                 
                 #print('fpath :',fpath)
                 f=open(fpath, 'r', encoding='utf-8')

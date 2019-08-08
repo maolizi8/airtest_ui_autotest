@@ -81,6 +81,7 @@ def driver_class(request):
 @pytest.fixture
 def air_dr(request,driver_class):
     """Returns a WebDriver instance based on options and capabilities"""
+    print('    request: ',request)
     startapp = request.config.getoption("startapp")
     if startapp:
         print('conftest: start app')
@@ -219,45 +220,10 @@ def _gather_driver_log(item, summary, extra):
 #             extra.append(pytest_html.extras.text(
 #                 format_log(log), '%s Log' % name.title()))
 
-
-'''钩子'''
-# @pytest.mark.optionalhook
-# def pytest_html_results_table_header(cells):
-#     cells.insert(2, html.th('Description'))
-#     cells.pop()
-# 
-# @pytest.mark.optionalhook
-# def pytest_html_results_table_row(report, cells):
-#     if hasattr(report,"description"):
-#         des=report.description
-#     else:
-#         des="无"
-#     cells.insert(2, html.td(des))
-#     cells.pop()
-                  
+                 
 def pytest_collection_finish(session):
     print('----pytest_collection_finish--------')
-    
     store_run_collections(session)
-    #if jkbuildid!=-1 and jkjobname:
-    #    #print('insert test collection to mysql, jobname: {}, buildid: {}'.format(jkjobname,jkbuildid))
-#         try:
-#             from localplugins.mysql_opr import query_pymysql
-#             #print('[session.fspath: {}]'.format(session.fspath))
-#             fspath=str(session.fspath).replace('\\','\\\\')
-#             fpath=os.path.join(PROJ_ROOT,'localplugins','resources', 'yyw-qa.json')
-#             f=open(fpath, 'r', encoding='utf-8')
-#             dbinfo = json.loads(f.read())
-#             sql='''
-#             INSERT INTO uitest_collect(htmlhead,jk_jobname,jk_buildid,fpath,tests_count)
-#             VALUES('{0}','{1}','{2}','{3}','{4}')
-#             '''.format(htmlhead,jkjobname,jkbuildid,fspath,len(session.items))
-#             query_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql)
-#             #print('.......insert test collection to mysql<uitest_collect>......',time.strftime('%Y-%m-%d %H:%M:%S'))
-#         except Exception as e:
-#             #print('[Exception<inserting to uitest_collect>]',end='')
-#             print('Exception when inserting test collection to mysql: ',e)
-#             #print('[Exception<inserting to uitest_collect>: {}]'.format(e),end='')
 
 
 @pytest.mark.hookwrapper
@@ -299,113 +265,6 @@ def pytest_runtest_makereport(item, call):
         report.sections.append(('pytest-appdriver', '\n'.join(summary)))
     report.extra = extra
     
-    jkbuildid=item.config.getoption("--jkbuildid")
-    jkjobname=item.config.getoption("--jkjobname")
-    if jkbuildid!=-1 and jkjobname:
-#         try:
-#             from html import escape
-#             from localplugins.mysql_opr import query_many_pymysql
-#             
-#             fpath=os.path.join(BASE_DIR,'localplugins','resources', 'yyw-0345.json')
-#             f=open(fpath, 'r', encoding='utf-8')
-#             dbinfo = json.loads(f.read())
-#             
-#             test_log=''
-#             error_png=''
-#             error_link=''
-#             error_html=''
-#             error_driverlog=''
-#             test_duration='%.4f' % report.duration
-#             
-#             if report.longrepr:
-#                 log1=escape(report.longreprtext)
-#                 log2=log1.replace('\\','\\\\')
-#                 for line in log2.splitlines():
-#                     separator = line.startswith('_ ' * 10)
-#                     if separator:
-#                         test_log+=line[:80]
-#                     else:
-#                         exception = line.startswith("E   ")
-#                         if exception:
-#                             test_log+='<span class="error">{}</span><br>'.format(line)
-#                         else:
-#                             test_log+=line
-#                     test_log+='<br>'
-#     
-#             for section in report.sections:
-#                 header = section[0]
-#                 content = escape(section[1].replace("\\","\\\\"))
-#                 test_log+=' {0} '.format(header).center(80, '-')
-#                 test_log+='<br>'
-#                 #if ANSI:
-#                 #    converter = Ansi2HTMLConverter(inline=False, escaped=False)
-#                 #    content = converter.convert(content, full=False)
-#                 test_log+=content
-#                 
-#             test_log=test_log.replace("'","\\'")
-# 
-#             if report.extra:
-#                 for o in report.extra:
-#                     if o['name']=='Screenshot':
-#                         error_png=o['content']
-#                     #if o['name']=='HTML':
-#                     #    error_html=o['content'].replace("'","\\'")
-#                     if o['name']=='URL':
-#                         error_link=o['content']
-#                     #if o['name']=='Driver Log':
-#                     #    error_driverlog+=o['content']
-#             
-#             sql1=''
-#             sql2=''
-#             run_phase=getattr(report, 'when', 'call')
-#             #print('[run_phase:{}, status:{}]'.format(run_phase,report.outcome))
-#             testcase_name=(' ::').join(report.nodeid.split('::'))
-#             if run_phase == 'setup':
-#                 if report.outcome=='failed' or report.outcome=='errors':
-#                     sql1='''
-#                     INSERT INTO uitest_tests(jk_jobname,jk_buildid,test_name,
-#                     test_result,test_phase,test_desc,test_duration)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-#                     '''.format(jkjobname, jkbuildid, testcase_name+' ::setup', 
-#                                report.outcome, report.when, report.description,test_duration)
-#                     sql2='''
-#                     INSERT INTO uitest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-#                     '''.format(jkjobname,jkbuildid,testcase_name+' ::setup',test_log, error_png,error_link)
-#             elif run_phase == 'call':
-#                 if report.outcome=='failed' or report.outcome=='errors':
-#                     sql1='''
-#                     INSERT INTO uitest_tests(jk_jobname,jk_buildid,test_name,test_result,
-#                     test_phase,test_desc,test_duration)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-#                     '''.format(jkjobname, jkbuildid, testcase_name, report.outcome,
-#                                report.when, report.description,test_duration)
-#                     sql2='''
-#                     INSERT INTO uitest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-#                     '''.format(jkjobname,jkbuildid,testcase_name,test_log, error_png,error_link)
-#                 else:
-#                     sql1='''
-#                     INSERT INTO uitest_tests(jk_jobname,jk_buildid,test_name,test_result,
-#                     test_phase,test_desc,test_duration,test_log)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}')
-#                     '''.format(jkjobname, jkbuildid, testcase_name, report.outcome,
-#                                report.when, report.description,test_duration,test_log)
-#             elif run_phase == 'teardown':
-#                 if report.outcome=='failed' or report.outcome=='errors':
-#                     sql1='''
-#                     INSERT INTO uitest_tests(jk_jobname,jk_buildid,test_name,
-#                     test_result,test_phase,test_desc,test_duration)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-#                     '''.format(jkjobname, jkbuildid, testcase_name+' ::tearDown', 
-#                                report.outcome, report.when, report.description, test_duration)
-#                     sql2='''
-#                     INSERT INTO uitest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-#                     VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-#                     '''.format(jkjobname,jkbuildid,testcase_name+' ::tearDown',test_log, error_png,error_link)
-#             query_many_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql1,sql2)
-#         except Exception as e:
-#             #print('[Exception<inserting to uitest_tests>]',end='')
-#             print('[Exception<inserting to uitest_tests>: {}]'.format(e),end='')
+    update_run_collections(item, call, report)
     
     

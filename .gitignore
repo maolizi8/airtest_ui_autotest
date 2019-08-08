@@ -21,4 +21,6 @@ __pycache__/
 
 # log/reports
 log
-#reports
+reports
+
+#yyw-qa.json

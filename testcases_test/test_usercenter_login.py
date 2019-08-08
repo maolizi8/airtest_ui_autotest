@@ -31,5 +31,6 @@ def test_login(air_dr):
 
 
 if __name__ == '__main__':
-    args=[__file__,'-m test_1','--html=../reports/report.html']
+    args=[__file__,'-m test_0','--html=../reports/report.html',
+          '--jkbuildid=1','--jkjobname=testdemo','--simple-html']
     pytest.main(args)
