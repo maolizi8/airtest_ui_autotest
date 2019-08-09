@@ -23,12 +23,12 @@ from airtest.core.helper import G, set_logdir
 #import logging
 #LOGGER = logging.getLogger(__name__)
 from localplugins.helper import GL
-PROJ_NAME = GL.proj_name
+PROJ_NAME = GL.PROJ_NAME
 PROJ_ROOT = os.path.dirname(os.path.abspath(__file__))
 print('conftest - PROJ_ROOT :',PROJ_ROOT)
 
-APP_PACKAGE = 'com.yiwang.fangkuaiyi'
-APP_ACTIVITY = 'com.yhyc.mvp.ui.LoadingActivity'
+APP_PACKAGE = GL.APP_PACKAGE
+APP_ACTIVITY = GL.APP_ACTIVITY
 
 def pytest_addoption(parser):
     '''命令行参数'''
@@ -86,33 +86,15 @@ def driver_class(request):
 
 @pytest.fixture
 def air_dr(request,driver_class):
-    """Returns a WebDriver instance based on options and capabilities"""
-    #print('    request: ',request)
-    dict_list = request.__dict__
-    dir_list = dir(request)
-#     print('    request.__dict__: ',dict_list)
-#     print('    request dir: ',dir_list)
-#     
-#     #print('    request._pyfuncitem: ',request._pyfuncitem)
-#     print('    request.function: ',request.function)
-#     print('    request.function.__dict__: ',request.function.__dict__)
-#     print('    request.module: ',request.module)
-#     print('    request.module.__dict__: ',request.module.__dict__)
-#     print('    request.module dir: ',dir(request.module))
-#     print('    request.node: ',request.node)
-#     print('    request.node.__dict__: ',request.node.__dict__)
-#     print('    request.node dir: ',dir(request.node))
-    
     case_name = request.node._nodeid
     airtestlog = request.config.getoption("airtestlog")
     if airtestlog:
         split_path = request.module.__file__.split(PROJ_NAME)
-        log_parentdir = split_path[0]+PROJ_NAME+'\\'+'reports'
+        log_parentdir = split_path[0]+PROJ_NAME+'\\'+GL.REPORT_DIR
         if not os.path.exists(log_parentdir):
             os.mkdir(log_parentdir)
         jkbuildid=request.config.getoption("--jkbuildid")
         jkjobname=request.config.getoption("--jkjobname")
-        htmlhead=request.config.getoption("--htmlhead")
         if jkbuildid!=-1 and jkjobname:
             logdir = os.path.join(log_parentdir,jkjobname)
             if not os.path.exists(logdir):
@@ -229,46 +211,6 @@ def _gather_driver_log(item, summary, extra):
                 extra.append(pytest_html.extras.text(f.read(), 'Driver Log'))
             summary.append('Driver log: {0}'.format(item.config._driver_log))
             
-
-# 
-# def _gather_html(item, report, driver, summary, extra):
-#     try:
-#         html = driver.page_source
-#     except Exception as e:
-#         summary.append('WARNING: Failed to gather HTML: {0}'.format(e))
-#         return
-#     pytest_html = item.config.pluginmanager.getplugin('html')
-#     if pytest_html is not None:
-#         # add page source to the html report
-#         extra.append(pytest_html.extras.text(html, 'HTML'))
-# 
-# def format_log(log):
-#     timestamp_format = '%Y-%m-%d %H:%M:%S.%f'
-#     entries = [u'{0} {1[level]} - {1[message]}'.format(
-#         datetime.utcfromtimestamp(entry['timestamp'] / 1000.0).strftime(
-#             timestamp_format), entry).rstrip() for entry in log]
-#     log = '\n'.join(entries)
-#     return log
-# 
-# def _gather_logs(item, report, driver, summary, extra):
-#     pytest_html = item.config.pluginmanager.getplugin('html')
-#     try:
-#         types = driver.log_types
-#     except Exception as e:
-#         # note that some drivers may not implement log types
-#         summary.append('WARNING: Failed to gather log types: {0}'.format(e))
-#         return
-#     for name in types:
-#         try:
-#             log = driver.get_log(name)
-#         except Exception as e:
-#             summary.append('WARNING: Failed to gather {0} log: {1}'.format(
-#                 name, e))
-#             return
-#         if pytest_html is not None:
-#             extra.append(pytest_html.extras.text(
-#                 format_log(log), '%s Log' % name.title()))
-
 def pytest_collection_finish(session):
     print('----pytest_collection_finish--------')
     store_run_collections(session)
@@ -313,30 +255,6 @@ def pytest_runtest_makereport(item, call):
  
     outcome = yield
     report = outcome.get_result()
-    
-    #print('    call.__dict__: ',call.__dict__)
-    #print('    call dir: ',dir(call))
-    
-#     run_phase=getattr(report, 'when', 'call')
-#     if run_phase == 'call':
-#         print('    outcome: ',outcome)
-#         print('    ~~~~')
-#         print('    outcome __dict__: ',outcome.__dict__)
-#         print('    ~~~~')
-#         print('    outcome dir: ',outcome.excinfo)
-#         print('    ~~~~')
-#         print('    outcome dir: ',outcome.force_result)
-#         print('    ~~~~')
-#         print('    outcome dir: ',outcome.from_call)
-#         print('    ~~~~')
-#         print('    outcome dir: ',outcome.__dict__)
-#         print('    ~~~~')
-#         print('    report: ',report)
-#         print('    ~~~~')
-#         print('    report __dict__: ',report.__dict__)
-#         print('    ~~~~')
-#         print('    report dir: ',dir(report))
-#         print('    ~~~~')
     
     report.description = str(item.function.__doc__)
     summary = []

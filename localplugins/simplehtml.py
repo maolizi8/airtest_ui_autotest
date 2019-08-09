@@ -15,6 +15,7 @@ import time
 import bisect
 import hashlib
 import warnings
+from localplugins.helper import GL
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print('BASE_DIR :',BASE_DIR)
@@ -82,7 +83,7 @@ def store_run_cases(item, nextitem):
             test_desc = str(item.function.__doc__)
             test_name = (' ::').join(item.nodeid.split('::'))
             #print('    item.logdir: ',item.logdir)
-            test_html = ('/').join(['reports',jkjobname,jkbuildid,item.module.__name__,item.function.__name__,'log.html'])
+            test_html = ('/').join([GL.REPORT_DIR,jkjobname,jkbuildid,item.module.__name__,item.function.__name__,'log.html'])
             
             sql='''
                 INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,
@@ -93,7 +94,6 @@ def store_run_cases(item, nextitem):
             
             query_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql)
         except Exception as e:
-            #print('[Exception<inserting to uitest_tests>]',end='')
             print('[Exception<inserting to ui_autotest_tests>: {} {}]'.format(item.nodeid,e),end='')
             
 def update_run_tests(item, call, report):
@@ -151,7 +151,6 @@ def update_run_tests(item, call, report):
             run_phase=getattr(report, 'when', 'call')
             #print('[run_phase:{}, status:{}]'.format(run_phase,report.outcome))
             testcase_name=(' ::').join(report.nodeid.split('::'))
-            test_html = ('/').join([jkjobname,jkbuildid,item.module.__name__,item.function.__name__,'log.html'])
             if run_phase == 'setup':
                 if report.outcome=='failed' or report.outcome=='errors':
                     sql1="""UPDATE ui_autotest_tests
@@ -205,7 +204,6 @@ def update_run_tests(item, call, report):
             #print('    sql1: ',sql1)
             query_many_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql1,sql2)
         except Exception as e:
-            #print('[Exception<inserting to uitest_tests>]',end='')
             print('[Exception<inserting to uitest_tests>: {} {}]'.format(item.nodeid,e),end='') 
             
             
