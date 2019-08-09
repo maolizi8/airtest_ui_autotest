@@ -1,27 +1,28 @@
 # -*- encoding=utf8 -*-
-__author__ = "geqiuli"
+"""
+Created on 2019-08-06
 
+@author: geqiuli
+"""
 from airtest.core.api import *
-from airtest.cli.parser import cli_setup
+# import your elements
+#from set_element.home import *
 
-auto_setup(__file__,)
-
-if not cli_setup():
-    auto_setup(__file__, logdir="E:\\airtest_proj\\airtest_ui_autotest\\logs", devices=[
-            "Android:///",
-    ])
-
-exists(Template(r"tpl1564721049802.png", record_pos=(-0.391, 0.807), resolution=(1080, 1920)))
-
-# script content
-print("start...")
-touch(Template(r"tpl1564717731381.png", record_pos=(-0.187, 0.812), resolution=(1080, 1920)))
-
-
-
+# your functions ...
 
 
 
 # generate html report
 # from airtest.report.report import simple_report
-# simple_report(__file__, logpath=None)
+# simple_report(__file__, logpath=True)
+
+if __name__ == '__main__':
+    auto_setup(__file__, devices=[
+            "Android:///",
+    ], logdir=True)
+    # android:/// or Android://127.0.0.1:5037/YOUR_UUID
+    # debug codes ...
+    
+    # generate html report, put this in the bottom
+    from airtest.report.report import simple_report
+    simple_report(__file__, logpath=True)

@@ -26,11 +26,18 @@ def test_login(air_dr):
     #assert_not_equal(home, False, '首页应加载出来')
     mine=h.home_go_mine()
     assert mine,'应切换到 我的 页面'
-    uc.login_with_account('testzdauto03','qqq123456',entername='测试终端自动化03')
+    name=uc.login_with_account('xxxxx','xxxxxx',entername='xxxxxx')
+    assert name=='xxxxx'
 
 
 
 if __name__ == '__main__':
-    args=[__file__,'-m test_0','--html=../reports/report.html',
-          '--jkbuildid=1','--jkjobname=testdemo','--simple-html']
+    args=[__file__,
+          '--html=../reports/report-12.html',
+          '--htmlhead=UI测试用例demo',
+          '--jkbuildid=12',
+          '--jkjobname=testdemo',
+          '--simple-html',
+          '--self-contained-html'
+          ]
     pytest.main(args)

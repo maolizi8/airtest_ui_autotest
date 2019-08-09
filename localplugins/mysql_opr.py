@@ -6,7 +6,7 @@ Created on 2019年4月22日
 import pymysql as ms
 
 
-def query_mysql(host,user,password,port,database,sql):
+def query_pymysql(host,user,password,port,database,sql):
     '''执行mysql语句，执行完会关闭连接'''
     rsp_data={}
     try:
@@ -46,7 +46,8 @@ def query_mysql(host,user,password,port,database,sql):
         rsp_data["rows"]=count
         #return rsp_data 
     except Exception as e:
-        msg=("SQL执行异常：%s" % e)
+        msg=("[MySQL.ExecutionError：%s]" % e)
+        print(msg,end='')
         rsp_data["code"]=1
         rsp_data["msg"]=msg
         rsp_data["data"]=None
@@ -54,11 +55,67 @@ def query_mysql(host,user,password,port,database,sql):
         #return rsp_data 
               
     finally:
-        print("关闭连接")
+        #print("关闭连接")
         conn.close()
-        print(rsp_data)
+        #print(rsp_data)
         return rsp_data   
-    
+
+def query_many_pymysql(host,user,password,port,database,*sql):
+    '''执行mysql语句'''
+    rsp_data={"msg":""}
+    try:
+        import pymysql
+        conn=pymysql.connect(
+            host=host,
+            user=user,
+            port=port,
+            passwd=password,
+            database=database,
+            charset="utf8"
+        )
+    except Exception as e:
+        msg=("获取数据库连接失败：%s" % e)
+        print("[MySQL.ConnectionError]",end='')
+        msg=("SQL执行异常：%s" % e)
+        rsp_data["code"]=1
+        rsp_data["msg"]=msg
+        rsp_data["data"]=None
+        rsp_data["rows"]=0
+        return rsp_data
+    try:
+        cursor=conn.cursor()
+        rsp_data["code"]=0
+        rsp_data["msg"]=''
+        rsp_data["data"]=[]
+        rsp_data["rows"]=0
+        for s in sql:
+            if s[:5].lower()=="insert":
+                s=pymysql.escape_string(s)
+            if s:
+                count=cursor.execute(s)
+                result=cursor.fetchall()
+                conn.commit()
+                #print('[MySQL-excute]',end='')
+                rsp_data["data"].append(result) 
+                rsp_data["rows"]+=count
+    except Exception as e:
+        msg=("[MySQL.ExecutionError：%s]" % e)
+        print(msg,end='')
+        rsp_data["code"]=1
+        rsp_data["msg"]=msg
+        rsp_data["data"]=''
+        rsp_data["rows"]=0
+        #return rsp_data 
+              
+    finally:
+        #print("close MySQL connection:",time.strftime('%Y-%m-%d %H:%M:%S'))
+        #print("关闭连接")
+        conn.close()
+        #print(rsp_data)
+        return rsp_data 
+        #print(rsp_data)
+        return rsp_data  
+        
 def get_connection(serverip, port, db_name, account, password):
     """
     @param flat: 0-使用脚本中的ip，1-使用数据库中的ip"""
@@ -227,10 +284,12 @@ def query_mysql3(host,user,password,port,database,sql):
         #return rsp_data 
               
     finally:
-        print("关闭连接")
+        #print("关闭连接")
         conn.close()
         print(rsp_data)
         return rsp_data   
+    
 
+    
 if __name__ == '__main__':
     pass

@@ -15,13 +15,15 @@ from datetime import datetime
 import os
 import io
 import pytest
-from localplugins.simplehtml import store_run_collections,update_run_collections
+from localplugins.simplehtml import store_run_collections,store_run_cases,update_run_tests
 from localplugins.simplehtml import HTMLReport
 from airtest.core.api import connect_device,start_app,stop_app,ST
+from airtest.core.helper import G, set_logdir
 
 #import logging
 #LOGGER = logging.getLogger(__name__)
-
+from localplugins.helper import GL
+PROJ_NAME = GL.proj_name
 PROJ_ROOT = os.path.dirname(os.path.abspath(__file__))
 print('conftest - PROJ_ROOT :',PROJ_ROOT)
 
@@ -30,7 +32,7 @@ APP_ACTIVITY = 'com.yhyc.mvp.ui.LoadingActivity'
 
 def pytest_addoption(parser):
     '''命令行参数'''
-    parser.addoption("--devices", action="store", default='Android:///',
+    parser.addoption("--devices", action="append",  default=[],
                      help="udid of the device to run scripts")
     parser.addoption("--uuid", action="store", 
                      help="udid of the device to run scripts")
@@ -40,6 +42,11 @@ def pytest_addoption(parser):
                      help="determaine wether start app or not")
     parser.addoption("--stopapp", action="store", default=True,
                      help="determaine wether stop app or not")
+    
+    parser.addoption("--airtestlog", action="store", default=True,
+                     help="generate airtest log")
+    parser.addoption("--airtesthtml", action="store", default=True,
+                     help="generate airtest html")
     
     parser.addoption("--username", action="store", 
                      help="the username to login in")
@@ -65,25 +72,88 @@ def driver_class(request):
     devices = request.config.getoption("devices")
     print()
     print("conftest: device_session")
-    device_session=connect_device(devices)
+    #device_session=connect_device(devices)
+    device_session=[]
+    if devices:
+        for dev in devices:
+            print('    dev: ',dev)
+            device_session.append(connect_device(dev))
+    else:
+        dev = 'Android:///'
+        device_session.append(connect_device(dev))
     print('conftest: ',device_session)
     return device_session
 
 @pytest.fixture
 def air_dr(request,driver_class):
     """Returns a WebDriver instance based on options and capabilities"""
-    print('    request: ',request)
+    #print('    request: ',request)
+    dict_list = request.__dict__
+    dir_list = dir(request)
+#     print('    request.__dict__: ',dict_list)
+#     print('    request dir: ',dir_list)
+#     
+#     #print('    request._pyfuncitem: ',request._pyfuncitem)
+#     print('    request.function: ',request.function)
+#     print('    request.function.__dict__: ',request.function.__dict__)
+#     print('    request.module: ',request.module)
+#     print('    request.module.__dict__: ',request.module.__dict__)
+#     print('    request.module dir: ',dir(request.module))
+#     print('    request.node: ',request.node)
+#     print('    request.node.__dict__: ',request.node.__dict__)
+#     print('    request.node dir: ',dir(request.node))
+    
+    case_name = request.node._nodeid
+    airtestlog = request.config.getoption("airtestlog")
+    if airtestlog:
+        split_path = request.module.__file__.split(PROJ_NAME)
+        log_parentdir = split_path[0]+PROJ_NAME+'\\'+'reports'
+        if not os.path.exists(log_parentdir):
+            os.mkdir(log_parentdir)
+        jkbuildid=request.config.getoption("--jkbuildid")
+        jkjobname=request.config.getoption("--jkjobname")
+        htmlhead=request.config.getoption("--htmlhead")
+        if jkbuildid!=-1 and jkjobname:
+            logdir = os.path.join(log_parentdir,jkjobname)
+            if not os.path.exists(logdir):
+                os.mkdir(logdir)
+            logdir = os.path.join(logdir,jkbuildid)
+            if not os.path.exists(logdir):
+                os.mkdir(logdir)
+        else:
+            logdir = log_parentdir
+        #log_subdir = request.module.__name__+' '+request.function.__name__
+        logdir = os.path.join(logdir,request.module.__name__)
+        if not os.path.exists(logdir):
+            os.mkdir(logdir)
+        logdir = os.path.join(logdir,request.function.__name__)
+        if not os.path.exists(logdir):
+            os.mkdir(logdir)
+        print('    logdir: ',logdir)
+        #request.logdir=logdir
+        G.LOGGING.debug('logdir: %s' % logdir)
+        set_logdir(logdir)
+    
     startapp = request.config.getoption("startapp")
     if startapp:
         print('conftest: start app')
         start_app(APP_PACKAGE)
     yield driver_class
-    stopapp = request.config.getoption("stopapp")
-    if stopapp:
-        stop_app(APP_PACKAGE)
-        print()
-        print('conftest: stop app')
-
+    
+    def dr_finalizer():
+        stopapp = request.config.getoption("stopapp")
+        if stopapp:
+            stop_app(APP_PACKAGE)
+            print()
+            print('conftest: stop app')
+        
+        airtesthtml = request.config.getoption("airtesthtml")
+        if airtesthtml:
+            from airtest.report.report import custom_report
+            custom_report(case_name, logpath=logdir)
+    request.addfinalizer(dr_finalizer)
+    
+            
 @pytest.fixture
 def startapp(request):
     '''用例teardown：是否重新打开app'''
@@ -159,23 +229,7 @@ def _gather_driver_log(item, summary, extra):
                 extra.append(pytest_html.extras.text(f.read(), 'Driver Log'))
             summary.append('Driver log: {0}'.format(item.config._driver_log))
             
-# def _gather_screenshot(item, report, driver, summary, extra):
-#     try:
-#         #截图前先切回原生： NATIVE_APP
-#         pre_context=driver.current_context
-#         if pre_context!='NATIVE_APP':
-#             driver.switch_to.context('NATIVE_APP')
-#         screenshot = driver.get_screenshot_as_base64()
-#         
-#         if pre_context!='NATIVE_APP':
-#             driver.switch_to.context(pre_context)
-#     except Exception as e:
-#         summary.append('WARNING: Failed to gather screenshot: {0}'.format(e))
-#         return
-#     pytest_html = item.config.pluginmanager.getplugin('html')
-#     if pytest_html is not None:
-#         # add screenshot to the html report
-#         extra.append(pytest_html.extras.image(screenshot, 'Screenshot'))
+
 # 
 # def _gather_html(item, report, driver, summary, extra):
 #     try:
@@ -215,25 +269,84 @@ def _gather_driver_log(item, summary, extra):
 #             extra.append(pytest_html.extras.text(
 #                 format_log(log), '%s Log' % name.title()))
 
-                 
 def pytest_collection_finish(session):
     print('----pytest_collection_finish--------')
     store_run_collections(session)
+    
+#@pytest.mark.hookwrapper
+def pytest_runtest_protocol(item, nextitem):
+    #print('    hook pytest_runtest_protocol!!!!')
+    store_run_cases(item, nextitem)
+                 
 
 
+# def _gather_screenshot(item, report, driver, summary, extra):
+#     try:
+#         screen = G.DEVICE.snapshot()
+# #         #截图前先切回原生： NATIVE_APP
+# #         pre_context=driver.current_context
+# #         if pre_context!='NATIVE_APP':
+# #             driver.switch_to.context('NATIVE_APP')
+# #         screenshot = driver.get_screenshot_as_base64()
+# #          
+# #         if pre_context!='NATIVE_APP':
+# #             driver.switch_to.context(pre_context)
+#     except Exception as e:
+#         summary.append('WARNING: Failed to gather screenshot: {0}'.format(e))
+#         return
+#     pytest_html = item.config.pluginmanager.getplugin('html')
+#     if pytest_html is not None:
+#         # add screenshot to the html report
+#         extra.append(pytest_html.extras.image(screenshot, 'Screenshot'))
+
+
+# def pytest_runtest_logstart(nodeid, location):
+#     print('    >>>>>pytest_runtest_logstart nodeid: ',nodeid)   
+#     print('    >>>>>pytest_runtest_logstart location: ',location)   
+        
+# def pytest_runtest_logfinish(nodeid, location):
+#     print('    <<<<<<<<pytest_runtest_logfinish nodeid: ',nodeid)   
+#     print('    <<<<<<<<pytest_runtest_logfinish location: ',location)  
+    
 @pytest.mark.hookwrapper
 def pytest_runtest_makereport(item, call):
-
+ 
     outcome = yield
     report = outcome.get_result()
+    
+    #print('    call.__dict__: ',call.__dict__)
+    #print('    call dir: ',dir(call))
+    
+#     run_phase=getattr(report, 'when', 'call')
+#     if run_phase == 'call':
+#         print('    outcome: ',outcome)
+#         print('    ~~~~')
+#         print('    outcome __dict__: ',outcome.__dict__)
+#         print('    ~~~~')
+#         print('    outcome dir: ',outcome.excinfo)
+#         print('    ~~~~')
+#         print('    outcome dir: ',outcome.force_result)
+#         print('    ~~~~')
+#         print('    outcome dir: ',outcome.from_call)
+#         print('    ~~~~')
+#         print('    outcome dir: ',outcome.__dict__)
+#         print('    ~~~~')
+#         print('    report: ',report)
+#         print('    ~~~~')
+#         print('    report __dict__: ',report.__dict__)
+#         print('    ~~~~')
+#         print('    report dir: ',dir(report))
+#         print('    ~~~~')
+    
     report.description = str(item.function.__doc__)
     summary = []
     extra = getattr(report, 'extra', [])
     
-    driver=None
-    if 'app_driver' in item.funcargs:
-        driver = item.funcargs['app_driver']
-        
+    #print('    item.funcargs:',item.funcargs)
+#     driver=None
+#     if 'air_dr' in item.funcargs:
+#         driver = item.funcargs['air_dr']
+         
     xfail = hasattr(report, 'wasxfail')
     failure = (report.skipped and xfail) or (report.failed and not xfail)
     when = item.config.getini('selenium_capture_debug').lower()
@@ -247,19 +360,20 @@ def pytest_runtest_makereport(item, call):
             _gather_driver_log(item, summary, extra)
         #print('--------------driver--------------')
         #print(driver)
-#         if driver is not None:
+        #if driver is not None:
+#         if 'air_dr' in item.funcargs:
 #             # gather debug that depends on a driver instance
 #             if 'screenshot' not in exclude:
 #                 _gather_screenshot(item, report, driver, summary, extra)
-#             #if 'html' not in exclude:
-#             #    _gather_html(item, report, driver, summary, extra)
-#             #if 'logs' not in exclude:
-#             #    _gather_logs(item, report, driver, summary, extra)
+            #if 'html' not in exclude:
+            #    _gather_html(item, report, driver, summary, extra)
+            #if 'logs' not in exclude:
+            #    _gather_logs(item, report, driver, summary, extra)
 
     if summary:
         report.sections.append(('pytest-appdriver', '\n'.join(summary)))
     report.extra = extra
     
-    update_run_collections(item, call, report)
+    update_run_tests(item, call, report)
     
     

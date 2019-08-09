@@ -18,7 +18,11 @@ from airtest.core.api import *
 
 if __name__ == '__main__':
     auto_setup(__file__, devices=[
-            "Android://127.0.0.1:5037/46709b100104",
+            "Android:///",
     ], logdir=True)
     # android:/// or Android://127.0.0.1:5037/YOUR_UUID
     # debug codes ...
+    
+    # generate html report, put this in the bottom
+    from airtest.report.report import simple_report
+    simple_report(__file__, logpath=True)

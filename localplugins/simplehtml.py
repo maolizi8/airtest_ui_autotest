@@ -64,10 +64,39 @@ def store_run_collections(session):
             #print('.......insert test collection to mysql<uitest_collect>......',time.strftime('%Y-%m-%d %H:%M:%S'))
         except Exception as e:
             #print('[Exception<inserting to uitest_collect>]',end='')
-            print('Exception when inserting test collection to mysql: ',e)
+            print('[Exception when inserting ui_autotest_collections to mysql: {}]'.format(e),end='')   
             #print('[Exception<inserting to uitest_collect>: {}]'.format(e),end='')
 
-def update_run_collections(item, call, report):
+def store_run_cases(item, nextitem):
+    jkbuildid=item.config.getoption("--jkbuildid")
+    jkjobname=item.config.getoption("--jkjobname")
+    if jkbuildid!=-1 and jkjobname:
+        try:
+            from html import escape
+            from localplugins.mysql_opr import query_pymysql
+             
+            fpath=os.path.join(BASE_DIR,'localplugins','resources', 'mysql_qa.json')
+            f=open(fpath, 'r', encoding='utf-8')
+            dbinfo = json.loads(f.read())
+            
+            test_desc = str(item.function.__doc__)
+            test_name = (' ::').join(item.nodeid.split('::'))
+            #print('    item.logdir: ',item.logdir)
+            test_html = ('/').join(['reports',jkjobname,jkbuildid,item.module.__name__,item.function.__name__,'log.html'])
+            
+            sql='''
+                INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,
+                test_result,test_desc,test_html)
+                VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
+                '''.format(jkjobname, jkbuildid, test_name, 
+                           'InProgress', test_desc, test_html)
+            
+            query_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql)
+        except Exception as e:
+            #print('[Exception<inserting to uitest_tests>]',end='')
+            print('[Exception<inserting to ui_autotest_tests>: {} {}]'.format(item.nodeid,e),end='')
+            
+def update_run_tests(item, call, report):
     jkbuildid=item.config.getoption("--jkbuildid")
     jkjobname=item.config.getoption("--jkjobname")
     if jkbuildid!=-1 and jkjobname:
@@ -82,8 +111,6 @@ def update_run_collections(item, call, report):
             test_log=''
             error_png=''
             error_link=''
-            error_html=''
-            error_driverlog=''
             test_duration='%.4f' % report.duration
             
             if report.longrepr:
@@ -106,9 +133,6 @@ def update_run_collections(item, call, report):
                 content = escape(section[1].replace("\\","\\\\"))
                 test_log+=' {0} '.format(header).center(80, '-')
                 test_log+='<br>'
-                #if ANSI:
-                #    converter = Ansi2HTMLConverter(inline=False, escaped=False)
-                #    content = converter.convert(content, full=False)
                 test_log+=content
                 
             test_log=test_log.replace("'","\\'")
@@ -117,65 +141,72 @@ def update_run_collections(item, call, report):
                 for o in report.extra:
                     if o['name']=='Screenshot':
                         error_png=o['content']
-                    #if o['name']=='HTML':
-                    #    error_html=o['content'].replace("'","\\'")
                     if o['name']=='URL':
                         error_link=o['content']
-                    #if o['name']=='Driver Log':
-                    #    error_driverlog+=o['content']
-            
+                    
             sql1=''
             sql2=''
+            test_start=int(float(call.start)*1000)
+            test_end=int(float(call.stop)*1000)
             run_phase=getattr(report, 'when', 'call')
             #print('[run_phase:{}, status:{}]'.format(run_phase,report.outcome))
             testcase_name=(' ::').join(report.nodeid.split('::'))
+            test_html = ('/').join([jkjobname,jkbuildid,item.module.__name__,item.function.__name__,'log.html'])
             if run_phase == 'setup':
                 if report.outcome=='failed' or report.outcome=='errors':
-                    sql1='''
-                    INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,
-                    test_result,test_phase,test_desc,test_duration)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-                    '''.format(jkjobname, jkbuildid, testcase_name+' ::setup', 
-                               report.outcome, report.when, report.description,test_duration)
+                    sql1="""UPDATE ui_autotest_tests
+                        SET test_result='{test_result}',test_phase='{test_phase}',test_duration='{test_duration}',
+                        test_start='{test_start}',test_end='{test_end}'
+                        WHERE jk_jobname='{jk_jobname}' AND jk_buildid='{jk_buildid}' AND test_name='{test_name}'
+                        """.format(test_result=report.outcome, test_phase=report.when, test_duration=test_duration,
+                                   test_start=test_start, test_end=test_end,
+                               jk_jobname=jkjobname, jk_buildid=jkbuildid, test_name=testcase_name)
                     sql2='''
-                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-                    '''.format(jkjobname,jkbuildid,testcase_name+' ::setup',test_log, error_png,error_link)
+                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,
+                    test_log,error_png,error_link,test_phase)
+                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
+                    '''.format(jkjobname,jkbuildid,testcase_name,test_log, error_png,error_link,report.when)
             elif run_phase == 'call':
                 if report.outcome=='failed' or report.outcome=='errors':
-                    sql1='''
-                    INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,test_result,
-                    test_phase,test_desc,test_duration)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-                    '''.format(jkjobname, jkbuildid, testcase_name, report.outcome,
-                               report.when, report.description,test_duration)
+                    sql1="""UPDATE ui_autotest_tests
+                        SET test_result='{test_result}',test_phase='{test_phase}',test_duration='{test_duration}',
+                        test_start='{test_start}',test_end='{test_end}'
+                        WHERE jk_jobname='{jk_jobname}' AND jk_buildid='{jk_buildid}' AND test_name='{test_name}'
+                        """.format(test_result=report.outcome, test_phase=report.when, test_duration=test_duration,
+                                   test_start=test_start, test_end=test_end,
+                               jk_jobname=jkjobname, jk_buildid=jkbuildid, test_name=testcase_name)
                     sql2='''
-                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-                    '''.format(jkjobname,jkbuildid,testcase_name,test_log, error_png,error_link)
+                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,
+                    test_log,error_png,error_link,test_phase)
+                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
+                    '''.format(jkjobname,jkbuildid,testcase_name,test_log, error_png,error_link,report.when)
                 else:
-                    sql1='''
-                    INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,test_result,
-                    test_phase,test_desc,test_duration,test_log)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}')
-                    '''.format(jkjobname, jkbuildid, testcase_name, report.outcome,
-                               report.when, report.description,test_duration,test_log)
+                    sql1="""UPDATE ui_autotest_tests
+                        SET test_result='{test_result}',test_phase='{test_phase}',test_duration='{test_duration}',
+                        test_start='{test_start}',test_end='{test_end}',test_log='{test_log}'
+                        WHERE jk_jobname='{jk_jobname}' AND jk_buildid='{jk_buildid}' AND test_name='{test_name}'
+                        """.format(test_result=report.outcome, test_phase=report.when, test_duration=test_duration,
+                                   test_start=test_start, test_end=test_end,test_log=test_log,
+                               jk_jobname=jkjobname, jk_buildid=jkbuildid, test_name=testcase_name)
             elif run_phase == 'teardown':
                 if report.outcome=='failed' or report.outcome=='errors':
-                    sql1='''
-                    INSERT INTO ui_autotest_tests(jk_jobname,jk_buildid,test_name,
-                    test_result,test_phase,test_desc,test_duration)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
-                    '''.format(jkjobname, jkbuildid, testcase_name+' ::tearDown', 
-                               report.outcome, report.when, report.description, test_duration)
+                    sql1="""UPDATE ui_autotest_tests
+                        SET test_result='{test_result}',test_phase='{test_phase}',test_duration='{test_duration}',
+                        test_start='{test_start}',test_end='{test_end}'
+                        WHERE jk_jobname='{jk_jobname}' AND jk_buildid='{jk_buildid}' AND test_name='{test_name}'
+                        """.format(test_result=report.outcome, test_phase=report.when, test_duration=test_duration,
+                                   test_start=test_start, test_end=test_end,
+                               jk_jobname=jkjobname, jk_buildid=jkbuildid, test_name=testcase_name)
                     sql2='''
-                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,test_log,error_png,error_link)
-                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}')
-                    '''.format(jkjobname,jkbuildid,testcase_name+' ::tearDown',test_log, error_png,error_link)
+                    INSERT INTO ui_autotest_tests_errors(jk_jobname,jk_buildid,test_name,
+                    test_log,error_png,error_link,test_phase)
+                    VALUES('{0}','{1}','{2}','{3}','{4}','{5}','{6}')
+                    '''.format(jkjobname,jkbuildid,testcase_name,test_log, error_png,error_link,report.when)
+            #print('    sql1: ',sql1)
             query_many_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql1,sql2)
         except Exception as e:
             #print('[Exception<inserting to uitest_tests>]',end='')
-            print('[Exception<inserting to uitest_tests>: {}]'.format(e),end='')    
+            print('[Exception<inserting to uitest_tests>: {} {}]'.format(item.nodeid,e),end='') 
             
             
 class HTMLReport(object):
@@ -443,7 +474,8 @@ class HTMLReport(object):
         suite_stop_time = time.time()
         suite_time_delta = suite_stop_time - self.suite_start_time
         test_duration = '%.4f' %(suite_time_delta)
-        numtests = self.passed + self.failed + self.xpassed + self.xfailed
+        #numtests = self.passed + self.failed + self.xpassed + self.xfailed
+        numtests = self.failed + self.passed + self.errors + self.xpassed + self.xfailed
         generated = datetime.datetime.now()
         
         jkbuildid=session.config.getoption("--jkbuildid")
@@ -468,7 +500,7 @@ class HTMLReport(object):
                 query_pymysql(dbinfo['host'],dbinfo['user'],dbinfo['password'],dbinfo['port'],'qateam',sql)
                 #print('.......update test collection to mysql <uitest_collect>......',time.strftime('%Y-%m-%d %H:%M:%S'))
             except Exception as e:
-                print('[Exception<updating to uitest_collect>]',end='')
+                print('[Exception<updating to uitest_collect>: {}]'.format(e),end='')
                 #print('Exception when updating test collection to mysql: ',e)
 
         self.style_css = pkg_resources.resource_string(

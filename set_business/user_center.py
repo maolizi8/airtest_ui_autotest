@@ -61,7 +61,7 @@ if __name__ == '__main__':
     ], logdir=True)
     
     # YOUR CODES .....
-    login_with_account('testzdauto03','qqq123456',entername='测试终端自动化03')
+    login_with_account('xxxx','xxxxx',entername='xxxxx')
     #go_to_all_order_list()
     
     # generate html report, put this in the bottom

@@ -15,9 +15,7 @@ print('test_airtest_cases>proj_root :',proj_root)
 
 @pytest.mark.run_case
 def test_run_airtest_cases(): 
-    #device = ['android:///'] #不指定则默认使用第一个
-    device = ['Android://127.0.0.1:5037/46709b100104']
-    #device = ['Android://127.0.0.1:5037/02157df271610a1b']
+    device = ['android:///'] #不指定则默认使用第一个
     run_air_batch_mode(device, proj_root, 'testcases1',f_type='.air')
  
 if __name__ == '__main__':

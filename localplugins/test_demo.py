@@ -26,21 +26,29 @@ from time import sleep
 #     pytest.skip('test skip') 
 #     print('----被跳过的用例，不会执行此句----')
 
-def test_demo_04():
+def test_demo_03(air_dr):
+    '''用例3'''
+    print('----测试失败的用例，中文----')
+    print(r'D:\test_autotest\AutoTest\testenv_case')
+    print('D:\\test_autotest\\AutoTest\\testenv_case')
+    sleep(1)
+    assert 1==1,'1==1！！'
+    
+def test_demo_04(air_dr):
     '''失败的用例4'''
     print('----测试失败的用例，中文----')
     print(r'D:\test_autotest\AutoTest\testenv_case')
     print('D:\\test_autotest\\AutoTest\\testenv_case')
     assert 1==2,'1竟然不等于2！！'
-    print('----被跳过的用例，不会执行此句----')
 
 if __name__ == '__main__' :
     
     args=[__file__,
-          '--driver=Chrome',
-          '--html=../reports/report-1.html',
+          #'-s'
+          #'--driver=Chrome',
+          '--html=../reports/report-6.html',
           '--htmlhead=UI测试用例demo',
-          '--jkbuildid=1',
+          '--jkbuildid=6',
           '--jkjobname=testdemo',
           '--simple-html',
           '--self-contained-html'
