@@ -95,6 +95,7 @@ def air_dr(request,driver_class):
             os.mkdir(log_parentdir)
         jkbuildid=request.config.getoption("--jkbuildid")
         jkjobname=request.config.getoption("--jkjobname")
+        
         if jkbuildid!=-1 and jkjobname:
             logdir = os.path.join(log_parentdir,jkjobname)
             if not os.path.exists(logdir):
@@ -116,6 +117,7 @@ def air_dr(request,driver_class):
         G.LOGGING.debug('logdir: %s' % logdir)
         set_logdir(logdir)
     
+        
     startapp = request.config.getoption("startapp")
     if startapp:
         print('conftest: start app')
@@ -130,11 +132,75 @@ def air_dr(request,driver_class):
             print('conftest: stop app')
         
         airtesthtml = request.config.getoption("airtesthtml")
-        if airtesthtml:
+        if airtesthtml and airtestlog:
             from airtest.report.report import custom_report
-            custom_report(case_name, logpath=logdir)
+            from airttest_settings import jk_server,static_server
+            #'http://xx.xx.x.x:8080/jenkins/job/TEST_job_onWindows/ws/report/TEST_job_onWindows/'
+            print('jk jk_server: ',jk_server)
+            #jk_logdir=logdir.split(PROJ_NAME)[1]
+            #print('jk log dir: ',jk_logdir)
+            #online_report=jk_server+'/job/'+jkjobname+'ws'+jk_logdir.replace('\\','/')+'/'
+            online_path=jk_server+'/job/'+jkjobname+'/ws/'
+            static_root=jk_server+'/job/'+jkjobname+'/ws/files/statics/'
+            
+            custom_report(case_name, logpath=logdir, 
+                          online_path=online_path, proj_name=PROJ_NAME, static_root=static_root)
+            assert 0
     request.addfinalizer(dr_finalizer)
-    
+
+@pytest.fixture
+def poco(request,driver_class): 
+    from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+    poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=True)
+    yield poco
+#     case_name = request.node._nodeid
+#     airtestlog = request.config.getoption("airtestlog")
+#     if airtestlog:
+#         split_path = request.module.__file__.split(PROJ_NAME)
+#         log_parentdir = split_path[0]+PROJ_NAME+'\\'+GL.REPORT_DIR
+#         if not os.path.exists(log_parentdir):
+#             os.mkdir(log_parentdir)
+#         jkbuildid=request.config.getoption("--jkbuildid")
+#         jkjobname=request.config.getoption("--jkjobname")
+#         if jkbuildid!=-1 and jkjobname:
+#             logdir = os.path.join(log_parentdir,jkjobname)
+#             if not os.path.exists(logdir):
+#                 os.mkdir(logdir)
+#             logdir = os.path.join(logdir,jkbuildid)
+#             if not os.path.exists(logdir):
+#                 os.mkdir(logdir)
+#         else:
+#             logdir = log_parentdir
+#         #log_subdir = request.module.__name__+' '+request.function.__name__
+#         logdir = os.path.join(logdir,request.module.__name__)
+#         if not os.path.exists(logdir):
+#             os.mkdir(logdir)
+#         logdir = os.path.join(logdir,request.function.__name__)
+#         if not os.path.exists(logdir):
+#             os.mkdir(logdir)
+#         print('    logdir: ',logdir)
+#         #request.logdir=logdir
+#         G.LOGGING.debug('logdir: %s' % logdir)
+#         set_logdir(logdir)
+#     
+#     startapp = request.config.getoption("startapp")
+#     if startapp:
+#         print('conftest: start app')
+#         start_app(APP_PACKAGE)
+#     yield driver_class
+#     
+#     def dr_finalizer():
+#         stopapp = request.config.getoption("stopapp")
+#         if stopapp:
+#             stop_app(APP_PACKAGE)
+#             print()
+#             print('conftest: stop app')
+#         
+#         airtesthtml = request.config.getoption("airtesthtml")
+#         if airtesthtml:
+#             from airtest.report.report import custom_report
+#             custom_report(case_name, logpath=logdir)
+#     request.addfinalizer(dr_finalizer)   
             
 @pytest.fixture
 def startapp(request):

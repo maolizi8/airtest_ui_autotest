@@ -6,7 +6,7 @@ Created on 2019-08-06
 """
 from set_element.mine import *
 from airtest.core.api import *
-from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+
 
 # your script content
 def login_without_check(poco,username,password,entername=''):
@@ -29,9 +29,9 @@ def login_without_check(poco,username,password,entername=''):
     print('登录完成，显示名称为：',display_name)
     return display_name
 
-def login_with_account(username,password,entername=''):
+def login_with_account(poco,username,password,entername=''):
     '''登录：未登录-则登录；已登录则判断后退出重登或结束'''
-    poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=True)
+    #poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=True)
     if exists(login_and_register):
         print('用户未登录，先登录')
         return login_without_check(poco,username,password,entername)
@@ -59,9 +59,10 @@ if __name__ == '__main__':
     auto_setup(__file__, devices=[
             "Android://127.0.0.1:5037/46709b100104",
     ], logdir=True)
-    
+    from poco.drivers.android.uiautomation import AndroidUiautomationPoco
+    poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=True)
     # YOUR CODES .....
-    login_with_account('xxxx','xxxxx',entername='xxxxx')
+    login_with_account(poco,'xxxx','xxxxx',entername='xxxxx')
     #go_to_all_order_list()
     
     # generate html report, put this in the bottom
