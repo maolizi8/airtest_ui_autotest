@@ -14,7 +14,7 @@ def home_init():
     print('等待首页加载：超时时间=10秒')
     wait(bottom_home_active,timeout=10)
     print('首页已加载')
-    return exists(bottom_home_active)
+    return exists(bottom_home_active),bottom_home_active
 
 
 def home_go_to_1yaodai():

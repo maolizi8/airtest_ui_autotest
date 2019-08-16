@@ -1,0 +1,128 @@
+///// request.__dict__:  ///// 
+{
+	'_parent_request': < FixtureRequest
+	for < Function test_go_to_mine >> ,
+	'fixturename': 'air_dr',
+	'param_index': 0,
+	'scope': 'function',
+	'_fixturedef': < FixtureDef argname = 'air_dr'
+	scope = 'function'
+	baseid = '' > ,
+	'_pyfuncitem': < Function test_go_to_mine > ,
+	'_fixture_defs': {
+		'base_url': < FixtureDef argname = 'base_url'
+		scope = 'session'
+		baseid = '' > ,
+		'_verify_url': < FixtureDef argname = '_verify_url'
+		scope = 'session'
+		baseid = '' > ,
+		'sensitive_url': < FixtureDef argname = 'sensitive_url'
+		scope = 'session'
+		baseid = '' > ,
+		'driver_class': < FixtureDef argname = 'driver_class'
+		scope = 'session'
+		baseid = '' > ,
+		'_skip_sensitive': < FixtureDef argname = '_skip_sensitive'
+		scope = 'function'
+		baseid = '' > ,
+		'air_dr': < FixtureDef argname = 'air_dr'
+		scope = 'function'
+		baseid = '' >
+	},
+	'_arg2fixturedefs': {
+		'_verify_url': ( < FixtureDef argname = '_verify_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'_skip_sensitive': ( < FixtureDef argname = '_skip_sensitive'
+			scope = 'function'
+			baseid = '' > , ),
+		'air_dr': ( < FixtureDef argname = 'air_dr'
+			scope = 'function'
+			baseid = '' > , ),
+		'base_url': ( < FixtureDef argname = 'base_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'sensitive_url': ( < FixtureDef argname = 'sensitive_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'driver_class': ( < FixtureDef argname = 'driver_class'
+			scope = 'session'
+			baseid = '' > , < FixtureDef argname = 'driver_class'
+			scope = 'session'
+			baseid = '' > ),
+		'request': None
+	},
+	'_arg2index': {
+		'_verify_url': -1,
+		'base_url': -1,
+		'sensitive_url': -1,
+		'driver_class': -1,
+		'_skip_sensitive': -1,
+		'air_dr': -1
+	},
+	'_fixturemanager': < _pytest.fixtures.FixtureManager object at 0x000000000C3B1518 >
+}
+
+///// request.node.__dict__:  ///// 
+{
+	'name': 'test_go_to_mine',
+	'parent': < Module reports / test_usercenter_login.py > ,
+	'config': < _pytest.config.Config object at 0x0000000003EDCA90 > ,
+	'session': < Session airtest_ui_autotest exitstatus = < ExitCode.OK: 0 > testsfailed = 0 testscollected = 1 > ,
+	'fspath': local('E:\\airtest_proj\\airtest_ui_autotest\\reports\\test_usercenter_login.py'),
+	'keywords': < NodeKeywords
+	for node < Function test_go_to_mine >> ,
+	'own_markers': [Mark(name = 'test_0', args = (), kwargs = {})],
+	'extra_keyword_matches': set(),
+	'_name2pseudofixturedef': {},
+	'_nodeid': 'reports/test_usercenter_login.py::test_go_to_mine',
+	'_report_sections': [('setup', 'stdout', '\nconftest: device_session\nconftest:  [<airtest.core.android.android.Android object at 0x000000000C4C4C88>]\n    logdir:  E:\\airtest_proj\\airtest_ui_autotest\\report\\TEST_job_onWindows\\264\\test_usercenter_login\\test_go_to_mine\nconftest: start app\n'), ('call', 'stdout', '等待首页加载：超时时间=10秒\n首页已加载\n'), ('call', 'stderr', "[11:03:54][INFO]<airtest.core.api> Try finding:\nTemplate(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\n[11:03:59][INFO]<airtest.core.api> match result: None\n[11:04:01][INFO]<airtest.core.api> match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}\n[11:04:01][INFO]<airtest.core.api> Try finding:\nTemplate(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\n[11:04:02][INFO]<airtest.core.api> match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}\n[11:04:02][INFO]<airtest.core.api> Try finding:\nTemplate(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\n[11:04:04][INFO]<airtest.core.api> match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}\n"), ('call', 'log', "INFO     airtest.core.api:cv.py:56 Try finding:\n                                   Template(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\nINFO     airtest.core.api:cv.py:153 match result: None\nINFO     airtest.core.api:cv.py:153 match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}\nINFO     airtest.core.api:cv.py:56 Try finding:\n                                   Template(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\nINFO     airtest.core.api:cv.py:153 match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}\nINFO     airtest.core.api:cv.py:56 Try finding:\n                                   Template(E:\\airtest_proj\\airtest_ui_autotest\\set_element\\home\\tpl1565078672707.png)\nINFO     airtest.core.api:cv.py:153 match result: {'result': (111, 1836), 'rectangle': [(49, 1771), (49, 1902), (174, 1902), (174, 1771)], 'confidence': 0.9790233373641968}")],
+	'user_properties': [],
+	'_args': None,
+	'_obj': < function test_go_to_mine at 0x000000000C3CE048 > ,
+	'_fixtureinfo': FuncFixtureInfo(argnames = ('air_dr', ), initialnames = ('_verify_url', '_skip_sensitive', 'air_dr'), names_closure = ['_verify_url', 'base_url', 'sensitive_url', 'driver_class', '_skip_sensitive', 'air_dr', 'request'], name2fixturedefs = {
+		'_verify_url': ( < FixtureDef argname = '_verify_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'_skip_sensitive': ( < FixtureDef argname = '_skip_sensitive'
+			scope = 'function'
+			baseid = '' > , ),
+		'air_dr': ( < FixtureDef argname = 'air_dr'
+			scope = 'function'
+			baseid = '' > , ),
+		'base_url': ( < FixtureDef argname = 'base_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'sensitive_url': ( < FixtureDef argname = 'sensitive_url'
+			scope = 'session'
+			baseid = '' > , ),
+		'driver_class': ( < FixtureDef argname = 'driver_class'
+			scope = 'session'
+			baseid = '' > , < FixtureDef argname = 'driver_class'
+			scope = 'session'
+			baseid = '' > )
+	}),
+	'fixturenames': ['_verify_url', 'base_url', 'sensitive_url', 'driver_class', '_skip_sensitive', 'air_dr', 'request'],
+	'funcargs': {
+		'_verify_url': None,
+		'base_url': '',
+		'sensitive_url': False,
+		'driver_class': [ < airtest.core.android.android.Android object at 0x000000000C4C4C88 > ],
+		'_skip_sensitive': None,
+		'air_dr': [ < airtest.core.android.android.Android object at 0x000000000C4C4C88 > ],
+		'request': < FixtureRequest
+		for < Function test_go_to_mine >>
+	},
+	'_request': < FixtureRequest
+	for < Function test_go_to_mine >> ,
+	'originalname': None,
+	'_location': ('reports\\test_usercenter_login.py', 12, 'test_go_to_mine'),
+	'catch_log_handlers': {
+		'setup': < LogCaptureHandler(NOTSET) > ,
+		'call': < LogCaptureHandler(NOTSET) > ,
+		'teardown': < LogCaptureHandler(NOTSET) >
+	},
+	'catch_log_handler': < LogCaptureHandler(NOTSET) > ,
+	'_skipped_by_mark': False,
+	'_evalxfail': < _pytest.mark.evaluate.MarkEvaluator object at 0x000000000C3B1668 >
+}

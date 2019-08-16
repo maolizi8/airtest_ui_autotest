@@ -142,14 +142,15 @@ def air_dr(request,driver_class):
             #online_report=jk_server+'/job/'+jkjobname+'ws'+jk_logdir.replace('\\','/')+'/'
             online_path=jk_server+'/job/'+jkjobname+'/ws/'
             static_root=jk_server+'/job/'+jkjobname+'/ws/files/statics/'
-            
-            custom_report(case_name, logpath=logdir, 
+            case_info={"name": case_name, "desc": request.node.function.__doc__}
+            custom_report(case_info, logdir, 
                           online_path=online_path, proj_name=PROJ_NAME, static_root=static_root)
-            assert 0
+            #assert 0
     request.addfinalizer(dr_finalizer)
 
 @pytest.fixture
 def poco(request,driver_class): 
+    # connect_device()
     from poco.drivers.android.uiautomation import AndroidUiautomationPoco
     poco = AndroidUiautomationPoco(use_airtest_input=True, screenshot_each_action=True)
     yield poco
